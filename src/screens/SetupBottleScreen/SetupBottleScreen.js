@@ -4,6 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, StatusBa
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNPickerSelect from 'react-native-picker-select';
+import BleManager, { BleState }  from 'react-native-ble-manager';
 
 const SetupBottleScreen = ({ navigation }) => {
   const scaleValue = new Animated.Value(1);
@@ -28,6 +29,19 @@ const SetupBottleScreen = ({ navigation }) => {
     transform: [{ scale: scaleValue }],
   };
 
+  const scanDevices = async () => {
+    //before scaning try to enable bluetooth if not enabled already
+    if (Platform.OS === 'android' && await BleManager.checkState() === BleState.Off) {
+      try {
+        await BleManager.enableBluetooth().then(() => console.info('Bluetooth is enabled'));
+        //go ahead to scan nearby devices
+      } catch (e) {
+        //prompt user to enable bluetooth manually and also give them the option to navigate to bluetooth settings directly.
+        return;
+      }
+    }
+  }
+
   return (
     <LinearGradient colors={['#0f2027', '#203a43', '#2c5364']} style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -48,7 +62,7 @@ const SetupBottleScreen = ({ navigation }) => {
 
         <View style={styles.iconRow}>
           <Icon name="bluetooth" size={30} color="#1e88e5" />
-          <TouchableOpacity style={styles.scanButton}>
+          <TouchableOpacity style={styles.scanButton} onPress={scanDevices}>
             <Text style={styles.scanButtonText}>Scan Devices</Text>
           </TouchableOpacity>
         </View>
