@@ -59,13 +59,13 @@ const HydrationTracker = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <LinearGradient
-       colors={['#0f2027', '#203a43', '#2c5364']} // Black to blue gradient
+       colors={['#0f2027', '#203a43', '#2c5364']} 
         style={styles.gradientBackground}
       >
         <View style={styles.goalSection}>
           <Text style={styles.goalText}>Today's Goal: {goal} Litres</Text>
           <Image
-            source={require('../../../assets/img/waterBottle.png')}
+            source={require('../../../assets/img/bottle.png')}
             style={styles.waterIcon}
           />
           <Text style={styles.progressText}>Progress: {progress} Litres</Text>
@@ -124,7 +124,6 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     alignItems: 'center',
-    // padding: 20,
   },
   gradientBackground: {
     flex: 1,
@@ -140,8 +139,8 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   waterIcon: {
-    width: 170,
-    height: 150,
+    width: 200,
+    height: 200,
     marginVertical: 10,
     resizeMode: 'contain',
   },

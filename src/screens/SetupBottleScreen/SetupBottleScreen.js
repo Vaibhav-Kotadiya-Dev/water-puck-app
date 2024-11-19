@@ -1,13 +1,28 @@
 /* eslint-disable react/no-unstable-nested-components */
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, StatusBar } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, StatusBar, Platform } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNPickerSelect from 'react-native-picker-select';
-import BleManager, { BleState }  from 'react-native-ble-manager';
+import BleManager, { BleState } from 'react-native-ble-manager';
+import {
+  askGPSPermission,
+  handleGPSPermission,
+  handleLocationPermission,
+} from '../../utils/gpsPermission';
+
+import {
+  askBluetoothPermissions,
+  handleBluetoothPermission,
+  openBluetoothSettings,
+} from '../../utils/blePermission';
+import scannedDevices from '../../utils/scanNearbyDevice';
+import connectDevice from '../../utils/connectDevice';
 
 const SetupBottleScreen = ({ navigation }) => {
   const scaleValue = new Animated.Value(1);
+  const [devices, setDevices] = useState([]); 
+  const [selectedDevice, setSelectedDevice] = useState(null); 
 
   const handlePressIn = () => {
     Animated.spring(scaleValue, {
@@ -30,17 +45,82 @@ const SetupBottleScreen = ({ navigation }) => {
   };
 
   const scanDevices = async () => {
-    //before scaning try to enable bluetooth if not enabled already
-    if (Platform.OS === 'android' && await BleManager.checkState() === BleState.Off) {
-      try {
-        await BleManager.enableBluetooth().then(() => console.info('Bluetooth is enabled'));
-        //go ahead to scan nearby devices
-      } catch (e) {
-        //prompt user to enable bluetooth manually and also give them the option to navigate to bluetooth settings directly.
+    console.log('clicked');
+    try {
+      // Handle GPS permission
+      const gpsPermission = await handleGPSPermission();
+      console.log('GPS permission:', gpsPermission);
+      
+      if (!gpsPermission) {
+        alert('GPS permission is required to proceed.');
         return;
       }
+
+      await handleLocationPermission();
+
+      const bluetoothPermission = await handleBluetoothPermission();
+      console.log('Bluetooth permission:', bluetoothPermission?.value);
+      
+      if (!bluetoothPermission?.value) {
+        alert('Bluetooth permission is required to scan devices. Please enable it in settings.');
+        return;
+      }
+
+      if (Platform.OS === 'android') {
+        const bleState = await BleManager.checkState();
+        if (bleState === BleState.Off) {
+          try {
+            console.log('Bluetooth is off, attempting to enable...');
+            await BleManager.enableBluetooth();
+            console.log('Bluetooth is enabled');
+          } catch (e) {
+            alert('Please enable Bluetooth manually from settings.');
+            openBluetoothSettings();
+            return;
+          }
+        }
+      }
+
+      const scannedDevicesList = await scannedDevices.scannedDevices();
+      // console.log('Discovered devices:', scannedDevicesList);
+
+      const devicesArray = Array.from(scannedDevicesList).map(([key, value]) => ({
+        id: key,
+        name: value.name || value.id,
+      }));
+
+      if (devicesArray.length === 0) {
+        alert('No devices found. Please make sure your bottle is on and in pairing mode.');
+      } else {
+        setDevices(devicesArray); 
+        alert('Devices found! Check the dropdown to select your bottle.');
+      }
+    } catch (error) {
+      console.error('Error during device scanning:', error);
+      alert('An error occurred during the scanning process. Please try again.');
     }
-  }
+  };
+
+  const handleDeviceConnect = async () => {
+    if (!selectedDevice) {
+      alert('Please select a device before proceeding.');
+      return;
+    }
+    console.log('connect clickkkkkk')
+    console.log('deviceId',selectedDevice)
+    try {
+      const isConnected = await connectDevice.connect(selectedDevice);
+      if (isConnected) {
+        alert('Bottle successfully connected!');
+        navigation.navigate('HydrationTracker');
+      } else {
+        alert('Failed to connect to the selected bottle. Try again.');
+      }
+    } catch (error) {
+      console.error('Error connecting to device:', error);
+      alert('Error connecting to the selected device.');
+    }
+  };
 
   return (
     <LinearGradient colors={['#0f2027', '#203a43', '#2c5364']} style={styles.container}>
@@ -68,15 +148,13 @@ const SetupBottleScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.pickerWrapper}>
-        <Text style={styles.pickerHeader}>
-        We have found the following bottle:
-        </Text>
+          <Text style={styles.pickerHeader}>We have found the following bottle:</Text>
           <RNPickerSelect
-            onValueChange={(value) => console.log(value)}
-            items={[
-              { label: 'SM Water (Blue)', value: 'blue' },
-              { label: 'SM Water (Black)', value: 'black' },
-            ]}
+            onValueChange={(value) => setSelectedDevice(value)}
+            items={devices?.map(device => ({
+              label: device.name,
+              value: device.id,
+            }))}
             placeholder={{ label: 'Select Bottle Type', value: null }}
             style={pickerSelectStyles}
             useNativeAndroidPickerStyle={false}
@@ -87,6 +165,7 @@ const SetupBottleScreen = ({ navigation }) => {
         <Animated.View style={animatedScaleStyle}>
           <TouchableOpacity
             style={styles.button}
+            // onPress={handleDeviceConnect} 
             onPress={() => navigation.navigate('HydrationTracker')}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
@@ -141,9 +220,9 @@ const styles = StyleSheet.create({
   iconRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent:'flex-start',
+    justifyContent: 'flex-start',
     marginBottom: 20,
-    marginRight:110,
+    marginRight: 110,
   },
   scanButton: {
     backgroundColor: 'transparent',
@@ -163,16 +242,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  pickerHeader : {
-    color:'#fff',
-    marginVertical:5,
+  pickerHeader: {
+    color: '#fff',
+    marginVertical: 5,
   },
   pickerWrapper: {
     width: '95%',
     borderRadius: 10,
     padding: 10,
     marginBottom: 20,
-
   },
   button: {
     backgroundColor: '#1e88e5',

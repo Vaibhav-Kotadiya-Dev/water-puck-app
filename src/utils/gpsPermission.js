@@ -40,7 +40,7 @@ const handleGPSPermission = async () => {
   if (Platform.OS === 'android') {
     const result = await askGPSPermission();
     if (result?.enabled) {
-      //GPS enabled successfully, display next permission
+        return true
     } else {
       //GPS couldn't be enabled. Show GPS modal warning
       if (result?.code === 'ERR00') {
@@ -101,6 +101,7 @@ const handleLocationPermission = async () => {
 
   if (isPermitted) {
     //Location permitted successfully, display next permission
+    console.log('location true')
    };
 };
 
