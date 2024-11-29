@@ -26,7 +26,7 @@ const scanNearbyDevices = async () => {
     let listeners = [];
 
     const onBleManagerDiscoverPeripheral = (peripheral) => {
-      console.log('Discovered Peripheral:', peripheral?.name); 
+      // console.log('Discovered Peripheral:', peripheral?.name); ~
         if (peripheral) {
           devicesMap.set(peripheral.id, peripheral);
         }

@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon1 from 'react-native-vector-icons/AntDesign';
 
 import HomeScreen from '../screens/HomeScreen/HomeScreen';
 import SetupBottleScreen from '../screens/SetupBottleScreen/SetupBottleScreen';
@@ -12,6 +13,8 @@ import ResetBottle from '../screens/ResetBottle/ResetBottle';
 import History from '../screens/History/History';
 import CustomDrawerContent from '../components/customeDrawer';
 import GradientHeader from '../components/customeHeader';
+import Setting from '../screens/Settings/Setting';
+import ScanningScreen from '../screens/ScanningScreen/ScanningScreen';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -47,6 +50,7 @@ const HydrationTrackerDrawer = () => {
           drawerIcon: ({ color, size }) => (
             <Icon name="water-outline" size={size} color={color} />
           ),
+          unmountOnBlur:true
         }}
       />
       <Drawer.Screen
@@ -56,6 +60,7 @@ const HydrationTrackerDrawer = () => {
           drawerIcon: ({ color, size }) => (
             <Icon name="target" size={size} color={color} />
           ),
+          unmountOnBlur:true
         }}
       />
       <Drawer.Screen
@@ -65,6 +70,7 @@ const HydrationTrackerDrawer = () => {
           drawerIcon: ({ color, size }) => (
             <Icon name="refresh" size={size} color={color} />
           ),
+          unmountOnBlur:true
         }}
       />
       <Drawer.Screen
@@ -74,6 +80,17 @@ const HydrationTrackerDrawer = () => {
           drawerIcon: ({ color, size }) => (
             <Icon name="history" size={size} color={color} />
           ),
+          unmountOnBlur:true
+        }}
+      />
+      <Drawer.Screen
+        name="Settings"
+        component={Setting}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Icon1 name="setting" size={size} color={color} />
+          ),
+          unmountOnBlur:true
         }}
       />
     </Drawer.Navigator>
@@ -107,6 +124,11 @@ const AppNavigator = () => {
           component={HydrationTrackerDrawer}
           options={{ headerShown: false }}
         />
+      <Stack.Screen 
+        name="ScanningScreen" 
+        component={ScanningScreen} 
+        options={{ headerShown: false }}
+      />
       </Stack.Navigator>
     </NavigationContainer>
   );

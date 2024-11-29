@@ -44,83 +44,83 @@ const SetupBottleScreen = ({ navigation }) => {
     transform: [{ scale: scaleValue }],
   };
 
-  const scanDevices = async () => {
-    console.log('clicked');
-    try {
-      // Handle GPS permission
-      const gpsPermission = await handleGPSPermission();
-      console.log('GPS permission:', gpsPermission);
+  // const scanDevices = async () => {
+  //   console.log('clicked');
+  //   try {
+  //     // Handle GPS permission
+  //     const gpsPermission = await handleGPSPermission();
+  //     console.log('GPS permission:', gpsPermission);
       
-      if (!gpsPermission) {
-        alert('GPS permission is required to proceed.');
-        return;
-      }
+  //     if (!gpsPermission) {
+  //       alert('GPS permission is required to proceed.');
+  //       return;
+  //     }
 
-      await handleLocationPermission();
+  //     await handleLocationPermission();
 
-      const bluetoothPermission = await handleBluetoothPermission();
-      console.log('Bluetooth permission:', bluetoothPermission?.value);
+  //     const bluetoothPermission = await handleBluetoothPermission();
+  //     console.log('Bluetooth permission:', bluetoothPermission?.value);
       
-      if (!bluetoothPermission?.value) {
-        alert('Bluetooth permission is required to scan devices. Please enable it in settings.');
-        return;
-      }
+  //     if (!bluetoothPermission?.value) {
+  //       alert('Bluetooth permission is required to scan devices. Please enable it in settings.');
+  //       return;
+  //     }
 
-      if (Platform.OS === 'android') {
-        const bleState = await BleManager.checkState();
-        if (bleState === BleState.Off) {
-          try {
-            console.log('Bluetooth is off, attempting to enable...');
-            await BleManager.enableBluetooth();
-            console.log('Bluetooth is enabled');
-          } catch (e) {
-            alert('Please enable Bluetooth manually from settings.');
-            openBluetoothSettings();
-            return;
-          }
-        }
-      }
+  //     if (Platform.OS === 'android') {
+  //       const bleState = await BleManager.checkState();
+  //       if (bleState === BleState.Off) {
+  //         try {
+  //           console.log('Bluetooth is off, attempting to enable...');
+  //           await BleManager.enableBluetooth();
+  //           console.log('Bluetooth is enabled');
+  //         } catch (e) {
+  //           alert('Please enable Bluetooth manually from settings.');
+  //           openBluetoothSettings();
+  //           return;
+  //         }
+  //       }
+  //     }
 
-      const scannedDevicesList = await scannedDevices.scannedDevices();
-      // console.log('Discovered devices:', scannedDevicesList);
+  //     const scannedDevicesList = await scannedDevices.scannedDevices();
+  //     // console.log('Discovered devices:', scannedDevicesList);
 
-      const devicesArray = Array.from(scannedDevicesList).map(([key, value]) => ({
-        id: key,
-        name: value.name || value.id,
-      }));
+  //     const devicesArray = Array.from(scannedDevicesList).map(([key, value]) => ({
+  //       id: key,
+  //       name: value.name || value.id,
+  //     }));
 
-      if (devicesArray.length === 0) {
-        alert('No devices found. Please make sure your bottle is on and in pairing mode.');
-      } else {
-        setDevices(devicesArray); 
-        alert('Devices found! Check the dropdown to select your bottle.');
-      }
-    } catch (error) {
-      console.error('Error during device scanning:', error);
-      alert('An error occurred during the scanning process. Please try again.');
-    }
-  };
+  //     if (devicesArray.length === 0) {
+  //       alert('No devices found. Please make sure your bottle is on and in pairing mode.');
+  //     } else {
+  //       setDevices(devicesArray); 
+  //       alert('Devices found! Check the dropdown to select your bottle.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error during device scanning:', error);
+  //     alert('An error occurred during the scanning process. Please try again.');
+  //   }
+  // };
 
-  const handleDeviceConnect = async () => {
-    if (!selectedDevice) {
-      alert('Please select a device before proceeding.');
-      return;
-    }
-    console.log('connect clickkkkkk')
-    console.log('deviceId',selectedDevice)
-    try {
-      const isConnected = await connectDevice.connect(selectedDevice);
-      if (isConnected) {
-        alert('Bottle successfully connected!');
-        navigation.navigate('HydrationTracker');
-      } else {
-        alert('Failed to connect to the selected bottle. Try again.');
-      }
-    } catch (error) {
-      console.error('Error connecting to device:', error);
-      alert('Error connecting to the selected device.');
-    }
-  };
+  // const handleDeviceConnect = async () => {
+  //   if (!selectedDevice) {
+  //     alert('Please select a device before proceeding.');
+  //     return;
+  //   }
+  //   console.log('connect clickkkkkk')
+  //   console.log('deviceId',selectedDevice)
+  //   try {
+  //     const isConnected = await connectDevice.connect(selectedDevice);
+  //     if (isConnected) {
+  //       alert('Bottle successfully connected!');
+  //       navigation.navigate('HydrationTracker');
+  //     } else {
+  //       alert('Failed to connect to the selected bottle. Try again.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error connecting to device:', error);
+  //     alert('Error connecting to the selected device.');
+  //   }
+  // };
 
   return (
     <LinearGradient colors={['#0f2027', '#203a43', '#2c5364']} style={styles.container}>
@@ -134,7 +134,7 @@ const SetupBottleScreen = ({ navigation }) => {
           placeholderTextColor="#c7c7c7"
         />
 
-        <Text style={styles.instruction}>
+        {/* <Text style={styles.instruction}>
           Turn your water bottle on and hold the button down until the light goes blue.
           If you don’t see your device below after a few minutes, go to Bluetooth Settings
           on your phone and connect manually, then return.
@@ -142,7 +142,7 @@ const SetupBottleScreen = ({ navigation }) => {
 
         <View style={styles.iconRow}>
           <Icon name="bluetooth" size={30} color="#1e88e5" />
-          <TouchableOpacity style={styles.scanButton} onPress={scanDevices}>
+          <TouchableOpacity style={styles.scanButton}  onPress={() => navigation.navigate('ScanningScreen')}>
             <Text style={styles.scanButtonText}>Scan Devices</Text>
           </TouchableOpacity>
         </View>
@@ -160,7 +160,7 @@ const SetupBottleScreen = ({ navigation }) => {
             useNativeAndroidPickerStyle={false}
             Icon={() => <Icon name="chevron-down" size={15} color="#fff" />}
           />
-        </View>
+        </View> */}
 
         <Animated.View style={animatedScaleStyle}>
           <TouchableOpacity
@@ -170,7 +170,7 @@ const SetupBottleScreen = ({ navigation }) => {
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
           >
-            <Text style={styles.buttonText}>Add Bottle</Text>
+            <Text style={styles.buttonText}>Next</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>

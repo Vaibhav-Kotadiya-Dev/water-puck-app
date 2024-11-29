@@ -1,6 +1,7 @@
 import {View, Text, StyleSheet, TextInput,TouchableOpacity, Animated} from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
+import { clearAllData } from '../../utils/storageUtils';
 
 export default function ResetBottle({navigation}) {
   const scaleValue = new Animated.Value(1);
@@ -24,6 +25,10 @@ export default function ResetBottle({navigation}) {
   const animatedScaleStyle = {
     transform: [{ scale: scaleValue }],
   };
+   const handleResetPress = async  () =>{
+    await clearAllData();
+    navigation.navigate('Hydration Tracker')
+   }
   return (
     <LinearGradient
       colors={['#0f2027', '#203a43', '#2c5364']}
@@ -39,7 +44,7 @@ export default function ResetBottle({navigation}) {
         <Animated.View style={animatedScaleStyle}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('Hydration Tracker')}
+            onPress={handleResetPress }
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
           >
@@ -111,7 +116,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 20,
     elevation: 5,
-    marginTop:450,
+    marginTop:350,
 
   },
   buttonText: {
